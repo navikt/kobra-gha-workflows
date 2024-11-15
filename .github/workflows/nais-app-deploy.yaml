@@ -1,0 +1,31 @@
+name: Deploy app
+
+on:
+  workflow_call:
+    inputs:
+      cluster:
+        required: true
+        type: string
+        description: Cluster det skal deployes til
+      resource:
+        required: true
+        type: string
+        description: NAIS resource (naiserator)
+      image:
+        required: true
+        type: string
+        description: Docker image
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Environment
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: ${{ inputs.cluster }}
+          RESOURCE: ${{ inputs.resource }}
+          IMAGE: ${{ inputs.image }}
+          TIMEOUT: 10m
+          PRINT_PAYLOAD: true

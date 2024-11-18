@@ -1,0 +1,83 @@
+name: Bygg og push docker image
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        required: false
+        type: string
+        description: Node version to build with
+        default: '22'
+      pnpm-version:
+        required: false
+        type: string
+        description: pnpm version to build with
+        default: '9'
+      image-tag:
+        required: false
+        type: string
+        description: Docker image tag
+        default: 'latest'
+    outputs:
+      image:
+        description: Google Artifact Registery image
+        value: ${{ jobs.build-push-image.outputs.image }}
+
+jobs:
+  build-push-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      - uses: pnpm/action-setup@v4
+        id: pnpm-install
+        with:
+          version: ${{ inputs.pnpm-version }}
+          run_install: false
+      - id: pnpm-cache
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('server/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies for client
+        run: pnpm install
+
+      - name: Install dependencies for server
+        run: cd server && pnpm install
+
+      - name: Build server
+        run: cd server && pnpm run build
+
+      - name: Build app
+        run: pnpm run build
+
+      - name: Build docker image
+        uses: docker/setup-buildx-action@v3
+
+      - name: Push Docker Image to GAR
+        uses: nais/docker-build-push@v0
+        id: docker-build-push
+        with:
+          team: okonomi
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          tag: ${{ inputs.image-tag }}
+    outputs:
+      image: ${{ steps.docker-build-push.outputs.image }}

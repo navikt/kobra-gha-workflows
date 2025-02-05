@@ -62,6 +62,9 @@ jobs:
       - name: Install dependencies for server
         run: cd server && pnpm install
 
+      - name: Run tests
+        run: pnpm run test
+
       - name: Build server
         run: cd server && pnpm run build
 

@@ -1,0 +1,65 @@
+name: PR bygg
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        required: false
+        type: string
+        description: Node version to build with
+        default: '22'
+      pnpm-version:
+        required: false
+        type: string
+        description: pnpm version to build with
+        default: '9'
+
+jobs:
+  build-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v4
+        id: pnpm-install
+        with:
+          version: ${{ inputs.pnpm-version }}
+          run_install: false
+      - id: pnpm-cache
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'pnpm'
+
+      - name: Install dependencies for client
+        run: |
+          pnpm config set //npm.pkg.github.com/:_authToken $NODE_AUTH_TOKEN
+          pnpm config set engine-strict true
+          pnpm config set @navikt:registry https://npm.pkg.github.com
+          pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
+
+      - name: Install dependencies for server
+        run: |
+          cd server
+          pnpm config set //npm.pkg.github.com/:_authToken $NODE_AUTH_TOKEN
+          pnpm config set engine-strict true
+          pnpm config set @navikt:registry https://npm.pkg.github.com
+          pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
+
+      - name: Run tests
+        run: pnpm run test
+
+      - name: Build server
+        run: cd server && pnpm run build
+
+      - name: Build app
+        run: pnpm run build

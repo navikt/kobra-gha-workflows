@@ -1,4 +1,4 @@
-name: PR bygg
+name: PR bygg V2
 
 on:
   workflow_call:
@@ -19,10 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
         with:
-          node-version: ${{ inputs.node-version }}
+          persist-credentials: false
 
       - uses: pnpm/action-setup@v4
         id: pnpm-install
@@ -39,19 +37,29 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
-
-      - uses: actions/cache@v4
+      - uses: actions/setup-node@v4
         with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('server/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          node-version: ${{ inputs.node-version }}
+          cache: 'pnpm'
 
       - name: Install dependencies for client
-        run: pnpm install
+        run: |
+          pnpm config set //npm.pkg.github.com/:_authToken $NODE_AUTH_TOKEN
+          pnpm config set engine-strict true
+          pnpm config set @navikt:registry https://npm.pkg.github.com
+          pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 
       - name: Install dependencies for server
-        run: cd server && pnpm install
+        run: |
+          cd server
+          pnpm config set //npm.pkg.github.com/:_authToken $NODE_AUTH_TOKEN
+          pnpm config set engine-strict true
+          pnpm config set @navikt:registry https://npm.pkg.github.com
+          pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 
       - name: Run tests
         run: pnpm run test

@@ -19,8 +19,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
         with:
-          persist-credentials: false
+          node-version: ${{ inputs.node-version }}
 
       - uses: pnpm/action-setup@v4
         id: pnpm-install
@@ -31,29 +33,25 @@ jobs:
         run: |
           echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
-      - uses: actions/setup-node@v4
+      - uses: actions/cache@v4
         with:
-          node-version: ${{ inputs.node-version }}
-          cache: 'pnpm'
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('server/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies for client
-        run: |
-          pnpm config set //npm.pkg.github.com/:_authToken $NODE_AUTH_TOKEN
-          pnpm config set engine-strict true
-          pnpm config set @navikt:registry https://npm.pkg.github.com
-          pnpm install --frozen-lockfile
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
+        run: pnpm install
 
       - name: Install dependencies for server
-        run: |
-          cd server
-          pnpm config set //npm.pkg.github.com/:_authToken $NODE_AUTH_TOKEN
-          pnpm config set engine-strict true
-          pnpm config set @navikt:registry https://npm.pkg.github.com
-          pnpm install --frozen-lockfile
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
+        run: cd server && pnpm install
 
       - name: Run tests
         run: pnpm run test

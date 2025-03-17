@@ -1,4 +1,4 @@
-name: PR bygg
+name: PR bygg V2
 
 on:
   workflow_call:

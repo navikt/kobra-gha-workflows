@@ -8,6 +8,11 @@ on:
         type: string
         description: JDK versjon som skal brukes
         default: '21'
+      gradle-task:
+        required: false
+        type: string
+        description: Gradle task som skal kjøres
+        default: 'build shadowJar'
 
 jobs:
   build-pr:
@@ -26,4 +31,4 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Execute Gradle build
-        run: ./gradlew build
+        run: ./gradlew ${{ inputs.gradle-task }}

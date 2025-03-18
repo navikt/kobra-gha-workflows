@@ -13,6 +13,12 @@ on:
         type: string
         description: Docker image tag
         default: 'latest'
+      gradle-task:
+        required: false
+        type: string
+        description: Gradle task som skal kjøres
+        default: 'build shadowJar'
+
     outputs:
       image:
         description: Google Artifact Registery image
@@ -35,7 +41,7 @@ jobs:
           DEPENDENCY_GRAPH_INCLUDE_CONFIGURATIONS: compileClasspath|runtimeClasspath
         with:
           dependency-graph: generate-and-submit
-      - run: ./gradlew build shadowJar
+      - run: ./gradlew ${{ inputs.gradle-task }}
 
       - name: Build Docker Image
         uses: docker/setup-buildx-action@v3

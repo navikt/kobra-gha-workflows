@@ -35,7 +35,7 @@ jobs:
           DEPENDENCY_GRAPH_INCLUDE_CONFIGURATIONS: compileClasspath|runtimeClasspath
         with:
           dependency-graph: generate-and-submit
-      - run: ./gradlew build distZip
+      - run: ./gradlew build installDist
 
       - name: Build Docker Image
         uses: docker/setup-buildx-action@v3

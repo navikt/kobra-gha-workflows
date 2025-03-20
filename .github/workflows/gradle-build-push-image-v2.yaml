@@ -6,7 +6,7 @@ on:
       java-version:
         required: false
         type: string
-        description: Java versjon som skal brukes
+        description: Java version to build with
         default: '21'
       image-tag:
         required: false
@@ -16,7 +16,7 @@ on:
       gradle-task:
         required: false
         type: string
-        description: Gradle task som skal kjøres
+        description: Gradle task to run
         default: 'build shadowJar'
     outputs:
       image:

@@ -6,7 +6,7 @@ on:
       java-version:
         required: true
         type: string
-        description: JDK versjon som skal brukes
+        description: Java version to build with
         default: '21'
       image-tag:
         required: false

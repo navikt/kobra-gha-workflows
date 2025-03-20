@@ -16,7 +16,7 @@ on:
 
 jobs:
   build-pr:
-    name: Bygg og test
+    name: Build and test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,4 +30,4 @@ jobs:
           java-version: ${{ inputs.java-version }}
 
       - uses: gradle/actions/setup-gradle@v4
-      - run: ${{ inputs.gradle-task }}
+      - run: ./gradlew ${{ inputs.gradle-task }}

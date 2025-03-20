@@ -6,15 +6,15 @@ on:
       cluster:
         required: true
         type: string
-        description: Cluster det skal deployes til
+        description: NAIS cluster to deploy to
       resource:
         required: true
         type: string
-        description: NAIS resource (naiserator)
+        description: NAIS resource to use for deployment
       image:
         required: true
         type: string
-        description: Docker image
+        description: Docker image to deploy
 
 jobs:
   deploy:

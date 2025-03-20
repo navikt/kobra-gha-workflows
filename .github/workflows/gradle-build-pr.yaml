@@ -6,17 +6,17 @@ on:
       java-version:
         required: false
         type: string
-        description: JDK versjon som skal brukes
+        description: Java version to build with
         default: '21'
       gradle-task:
         required: false
         type: string
-        description: Gradle task som skal kjøres
+        description: Gradle task to run
         default: 'build shadowJar'
 
 jobs:
   build-pr:
-    name: Bygg og test
+    name: Build and test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

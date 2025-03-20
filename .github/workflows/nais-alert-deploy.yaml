@@ -6,15 +6,15 @@ on:
       cluster:
         required: true
         type: string
-        description: Cluster det skal deployes til
+        description: NAIS cluster to deploy to
       resource:
         required: true
         type: string
-        description: NAIS resource fil (naiserator)
+        description: NAIS resource to use for deployment
       vars:
         required: false
         type: string
-        description: Fil med template variabler for $resource filen
+        description: File with template variable for $resource file
 
 jobs:
   deploy:

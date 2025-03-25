@@ -42,8 +42,6 @@ jobs:
         id: login
         with:
           team: okonomi
-          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
-          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
 
       - name: Run Trivy vulnerability scanner on docker image
         uses: aquasecurity/trivy-action@master

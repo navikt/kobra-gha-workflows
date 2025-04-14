@@ -1,0 +1,33 @@
+name: PR bygg og test
+
+on:
+  workflow_call:
+    inputs:
+      java-version:
+        required: false
+        type: string
+        description: Java version to build with
+        default: '21'
+      gradle-task:
+        required: false
+        type: string
+        description: Gradle task to run
+        default: 'build shadowJar'
+
+jobs:
+  build-pr:
+    name: Build and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ inputs.java-version }}
+
+      - uses: gradle/actions/setup-gradle@v4
+      - run: ./gradlew ${{ inputs.gradle-task }}

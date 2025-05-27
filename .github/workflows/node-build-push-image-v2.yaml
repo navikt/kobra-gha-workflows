@@ -52,6 +52,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - uses: actions/cache@v4
+        if: ${{ ! cancelled() && hashFiles('server/package.json') != '' }}
         with:
           path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('server/pnpm-lock.yaml') }}
@@ -82,6 +83,7 @@ jobs:
         run: pnpm run test
 
       - name: Build server
+        if: ${{ ! cancelled() && hashFiles('server/package.json') != '' }}
         run: cd server && pnpm run build
 
       - name: Build app

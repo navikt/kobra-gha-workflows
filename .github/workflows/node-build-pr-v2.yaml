@@ -66,6 +66,7 @@ jobs:
         run: pnpm run test
 
       - name: Build server
+        if: ${{ ! cancelled() && hashFiles('server/package.json') != '' }}
         run: cd server && pnpm run build
 
       - name: Build app

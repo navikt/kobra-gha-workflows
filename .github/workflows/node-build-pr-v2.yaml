@@ -52,6 +52,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 
       - name: Install dependencies for server
+        if: ${{ ! cancelled() && hashFiles('server/package.json') != '' }}
         run: |
           cd server
           pnpm config set //npm.pkg.github.com/:_authToken $NODE_AUTH_TOKEN

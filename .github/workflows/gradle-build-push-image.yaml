@@ -18,7 +18,9 @@ on:
         type: string
         description: Gradle task to run
         default: 'build shadowJar'
-
+      dockerfile:
+        type: string
+        description: Path to the Dockerfile.
     outputs:
       image:
         description: Google Artifact Registery image
@@ -52,5 +54,6 @@ jobs:
         with:
           team: okonomi
           tag: ${{ inputs.image-tag }}
+          dockerfile: ${{ inputs.dockerfile }}
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}

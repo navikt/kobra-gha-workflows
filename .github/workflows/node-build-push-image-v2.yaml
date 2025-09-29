@@ -27,7 +27,7 @@ jobs:
   build-push-image:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           persist-credentials: false
 
@@ -36,7 +36,7 @@ jobs:
           version: ${{ inputs.pnpm-version }}
           run_install: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ inputs.node-version }}
           cache: 'pnpm'

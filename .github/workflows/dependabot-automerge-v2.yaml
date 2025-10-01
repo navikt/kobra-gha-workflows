@@ -1,4 +1,4 @@
-name: Dependabot auto-merge v2
+name: Dependabot auto-merge
 on:
   workflow_call:
     inputs:
@@ -27,8 +27,11 @@ on:
         required: false
         type: boolean
         default: true
-  schedule:
-    - cron: '0 7-14 * * 1-5'  # 9 AM to 4 PM CEST (7 AM to 2 PM UTC) **NOTE** Vi må kanskje bytte denne ved vintertid? til '0 8-15 * * 1-5'
+      merge-method:
+        description: 'The merge method to use when merging pull requests (merge, squash, rebase)'
+        required: false
+        type: string
+        default: 'merge'
   workflow_dispatch:
 
 jobs:
@@ -52,6 +55,7 @@ jobs:
           semver-filter: ${{ inputs.semver-filter }}
           always-allow: ${{ inputs.always-allow }}
           auto-approve: ${{ inputs.auto-approve }}
+          merge-method: ${{ inputs.merge-method }}
 
       - name: Automerge results
         run: |

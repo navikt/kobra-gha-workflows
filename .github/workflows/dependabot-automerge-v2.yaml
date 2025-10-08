@@ -31,7 +31,7 @@ on:
         description: 'The merge method to use when merging pull requests (merge, squash, rebase)'
         required: false
         type: string
-        default: 'squash'
+        default: 'merge'
   workflow_dispatch:
 
 jobs:

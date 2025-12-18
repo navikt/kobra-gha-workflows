@@ -19,8 +19,8 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ inputs.node-version }}
       - uses: pnpm/action-setup@v4
@@ -42,7 +42,7 @@ jobs:
       - name: Run Accessibility tests
         run: pnpm exec playwright test
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: playwright-report

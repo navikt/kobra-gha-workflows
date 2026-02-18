@@ -1,0 +1,76 @@
+name: CodeQL/Trivy Scan
+
+on:
+  workflow_call:
+    inputs:
+      language:
+        required: true
+        type: string
+        description: "Programming language to analyze (eg: java or javascript)"
+      image-suffix:
+        required: false
+        type: string
+        default: ""
+        description: "Optional suffix to append to the image name (no leading dash)."
+
+env:
+  LATEST_PROD_IMAGE: ${{ format('{0}{1}:latest', github.event.repository.name, inputs.image-suffix != '' && format('-{0}', inputs.image-suffix) || '') }}
+  TRIVY_JAVA_DB_REPOSITORY: "public.ecr.aws/aquasecurity/trivy-java-db:1"
+  TRIVY_DB_REPOSITORY: "public.ecr.aws/aquasecurity/trivy-db"
+
+jobs:
+  codeql-trivy-scan:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: ${{ inputs.language }}
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # ratchet:step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@45cbd0c69e560cd9e7cd7f8c32362050c9b7ded2 # ratchet:github/codeql-action/init@v3
+        with:
+          tools: linked
+          languages: ${{ matrix.language }}
+          queries: security-extended,security-and-quality
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@45cbd0c69e560cd9e7cd7f8c32362050c9b7ded2 # ratchet:github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@45cbd0c69e560cd9e7cd7f8c32362050c9b7ded2 # ratchet:github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
+
+      - name: Login to Google Artifact Registry
+        uses: nais/login@e7cf2c159677dc7c7d599feff5f808f2bf59c7cf # ratchet:nais/login@v0
+        id: login
+        with:
+          team: okonomi
+
+      - name: Perform Trivy vulnerability scan on ${{ env.LATEST_PROD_IMAGE }} image
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # ratchet:aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.login.outputs.registry }}/${{ env.LATEST_PROD_IMAGE }}
+          ignore-unfixed: true
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "HIGH,CRITICAL"
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@45cbd0c69e560cd9e7cd7f8c32362050c9b7ded2 # ratchet:github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: "trivy-results.sarif"
+          category: "trivy"

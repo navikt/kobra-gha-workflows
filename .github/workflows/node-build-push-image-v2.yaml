@@ -84,7 +84,7 @@ jobs:
 
       - name: Build server
         if: ${{ ! cancelled() && hashFiles('server/package.json') != '' }}
-        run: cd server && pnpm run build --ignore-workspace
+        run: cd server && pnpm --ignore-workspace run build
 
       - name: Build app
         run: pnpm run build

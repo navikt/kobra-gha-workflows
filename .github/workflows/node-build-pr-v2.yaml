@@ -58,7 +58,7 @@ jobs:
           pnpm config set //npm.pkg.github.com/:_authToken $NODE_AUTH_TOKEN
           pnpm config set engine-strict true
           pnpm config set @navikt:registry https://npm.pkg.github.com
-          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --ignore-workspace
         env:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 
@@ -67,7 +67,7 @@ jobs:
 
       - name: Build server
         if: ${{ ! cancelled() && hashFiles('server/package.json') != '' }}
-        run: cd server && pnpm run build
+        run: cd server && pnpm run build --ignore-workspace
 
       - name: Build app
         run: pnpm run build

@@ -43,6 +43,7 @@ jobs:
           DEPENDENCY_GRAPH_INCLUDE_CONFIGURATIONS: compileClasspath|runtimeClasspath
         with:
           dependency-graph: generate-and-submit
+          cache-provider: 'basic'
       - run: ./gradlew ${{ inputs.gradle-task }}
 
       - name: Build Docker Image

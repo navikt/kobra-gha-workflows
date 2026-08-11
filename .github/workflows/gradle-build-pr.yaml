@@ -29,6 +29,8 @@ jobs:
           java-version: ${{ inputs.java-version }}
           
       - uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-provider: 'basic'
 
       - name: Execute Gradle build
         run: ./gradlew ${{ inputs.gradle-task }}
